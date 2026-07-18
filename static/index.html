@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lokal Web Scraper</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    
+    <button id="settings-toggle-btn" class="theme-toggle-btn animate-fade-in" title="Open Settings">
+        <i class="fa-solid fa-gear"></i>
+    </button>
+    
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header animate-fade-in">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <h1>Lokal</h1>
+            </div>
+            <p class="subtitle">Scrape and summarize any website locally with Gemma & Ollama</p>
+            <div class="status-bar">
+                <span class="status-indicator" id="status-scraper">
+                    <span class="status-dot status-checking"></span>
+                    <span class="status-label">Scraper: Checking...</span>
+                </span>
+                <span class="status-indicator" id="status-ollama">
+                    <span class="status-dot status-checking"></span>
+                    <span class="status-label">Local AI Engine: Checking...</span>
+                </span>
+            </div>
+        </header>
+
+        <div class="main-content-area">
+            <!-- Main Form Panel -->
+            <main class="main-panel glass-card animate-slide-up">
+            <form id="scraper-form">
+                <!-- URL input -->
+                <div class="input-group">
+                    <label for="url-input"><i class="fa-solid fa-link"></i> Webpage URL</label>
+                    <div class="url-input-wrapper">
+                        <input type="url" id="url-input" placeholder="https://example.com/article-to-summarize" required autocomplete="off">
+                        <button type="submit" id="submit-btn" class="primary-btn">
+                            <span class="btn-text">Summarize</span>
+                            <span class="btn-loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Config Options Grid -->
+                <div class="options-grid">
+                    <div class="option-item">
+                        <label for="model-select"><i class="fa-solid fa-brain"></i> Ollama Model</label>
+                        <div class="select-wrapper">
+                            <select id="model-select">
+                                <option value="" disabled selected>Loading models...</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down select-chevron"></i>
+                        </div>
+                        <span id="model-warning" class="status-warning hidden">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Ollama disconnected. Using fallbacks.
+                        </span>
+                    </div>
+
+                    <div class="option-item">
+                        <label for="format-select"><i class="fa-solid fa-indent"></i> Summary Format</label>
+                        <div class="select-wrapper">
+                            <select id="format-select">
+                                <option value="text">Paragraph Summary</option>
+                                <option value="bullet">Key Bullet Points</option>
+                                <option value="json">Structured JSON</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down select-chevron"></i>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </main>
+
+        <!-- Loading Phase Indicator -->
+        <div id="loader-panel" class="loader-panel glass-card hidden animate-fade-in">
+            <div class="spinner-container">
+                <div class="pulse-ring"></div>
+                <i class="fa-solid fa-spider loader-icon"></i>
+            </div>
+            <h3 id="loader-status">Fetching webpage content...</h3>
+            <p id="loader-subtext">This might take a few seconds depending on page size</p>
+        </div>
+
+        <!-- Error Panel -->
+        <div id="error-panel" class="error-panel glass-card error-glow hidden">
+            <div class="error-header">
+                <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                <h3>Extraction Failed</h3>
+            </div>
+            <p id="error-message">Something went wrong while scraping the webpage.</p>
+        </div>
+
+        <!-- Results Section -->
+        <section id="results-panel" class="results-panel hidden animate-slide-up">
+            <!-- Summary Output -->
+            <div class="glass-card result-card">
+                <div class="result-header">
+                    <h2><i class="fa-solid fa-square-poll-horizontal"></i> Summary Results</h2>
+                    <div class="action-buttons">
+                        <button id="speak-btn" class="icon-btn" title="Read summary aloud">
+                            <i class="fa-solid fa-volume-high"></i> Speak
+                        </button>
+                        <button id="copy-btn" class="icon-btn" title="Copy to clipboard">
+                            <i class="fa-regular fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                <div id="summary-content" class="summary-body text-format">
+                    <!-- Dynamic summary goes here -->
+                </div>
+            </div>
+
+            <!-- Collapsible Extracted Text -->
+            <details class="glass-card source-details">
+                <summary class="details-summary">
+                    <span><i class="fa-solid fa-file-lines"></i> View Cleaned Extracted Text</span>
+                    <i class="fa-solid fa-chevron-down details-chevron"></i>
+                </summary>
+                <div class="details-content">
+                    <pre id="extracted-text-body"></pre>
+                </div>
+            </details>
+        </section>
+        </div>
+
+        <!-- Right Column: History Sidebar -->
+        <aside class="history-sidebar glass-card animate-slide-up">
+            <div class="history-header">
+                <h2><i class="fa-solid fa-clock-rotate-left"></i> History</h2>
+            </div>
+            <div id="history-list" class="history-list">
+                <!-- Dynamic history items go here -->
+                <div class="history-empty">
+                    <i class="fa-solid fa-ghost"></i>
+                    <p>No recent summaries</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-card glass-card">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-sliders"></i> Settings</h2>
+                <button id="close-settings-btn" class="close-btn" title="Close settings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Theme Mode -->
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h3>Color Mode</h3>
+                        <p>Switch between light and dark interface</p>
+                    </div>
+                    <div class="toggle-switch-wrapper">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="mode-toggle-checkbox">
+                            <span class="slider"></span>
+                        </label>
+                        <span id="mode-toggle-label" class="toggle-label-text">Dark</span>
+                    </div>
+                </div>
+
+                <!-- Theme Style -->
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h3>Interface Style</h3>
+                        <p>Switch between glassmorphic and flat design</p>
+                    </div>
+                    <div class="toggle-switch-wrapper">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="style-toggle-checkbox">
+                            <span class="slider"></span>
+                        </label>
+                        <span id="style-toggle-label" class="toggle-label-text">Glassmorphic</span>
+                    </div>
+                </div>
+
+                <!-- Ollama URL -->
+                <div class="setting-row vertical-setting">
+                    <div class="setting-info">
+                        <h3>Ollama Host URL</h3>
+                        <p>Point to a custom local or network Ollama API</p>
+                    </div>
+                    <div class="input-with-button">
+                        <input type="url" id="ollama-host-input" placeholder="http://localhost:11434" autocomplete="off">
+                        <button id="save-host-btn" class="primary-btn small-btn">Save</button>
+                    </div>
+                    <span id="host-save-status" class="status-msg hidden">Saved successfully!</span>
+                </div>
+
+                <!-- Storage Clean -->
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h3>Storage Management</h3>
+                        <p>Wipe search history and cached summaries</p>
+                    </div>
+                    <button id="clear-history-btn-modal" class="primary-btn danger-btn danger-hover small-btn">
+                        <i class="fa-regular fa-trash-can"></i> Clear History
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
