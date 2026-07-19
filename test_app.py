@@ -113,8 +113,11 @@ class TestLokalScraper(unittest.TestCase):
 
     @patch('ollama.Client')
     @patch('main.fetch_page')
-    def test_api_summarize_success_and_history(self, mock_fetch, mock_ollama_client):
+    @patch('main.is_safe_url')
+    def test_api_summarize_success_and_history(self, mock_safe_url, mock_fetch, mock_ollama_client):
         """Test POST /api/summarize handles scrape request, queries Ollama, and appends to history."""
+        mock_safe_url.return_value = True
+        
         # 1. Mock website fetch response
         mock_fetch.return_value = """
         <html>
@@ -127,11 +130,13 @@ class TestLokalScraper(unittest.TestCase):
         </html>
         """
         
-        # 2. Mock Ollama generate summary response
+        # 2. Mock Ollama chat summary response
         mock_instance = MagicMock()
         mock_ollama_client.return_value = mock_instance
-        mock_instance.generate.return_value = {
-            "response": "This is a mock summary of the scraped content."
+        mock_instance.chat.return_value = {
+            "message": {
+                "content": "This is a mock summary of the scraped content."
+            }
         }
         
         payload = {
