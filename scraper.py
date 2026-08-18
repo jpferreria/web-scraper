@@ -98,7 +98,12 @@ def summarize_text(text: str, host: str, model: str, summary_format: str) -> str
                 {'role': 'user', 'content': f"Web Page Content:\n{text}"}
             ]
         )
-        return response['message']['content']
+        summary = response['message']['content']
+        metrics = {
+            "eval_tokens": response.get('eval_count', 0),
+            "prompt_tokens": response.get('prompt_eval_count', 0)
+        }
+        return summary, metrics
     except ollama.ResponseError as e:
         click.echo(f"Ollama API Error: {e.error}", err=True)
         if "not found" in e.error.lower():
@@ -134,11 +139,12 @@ def main(url, model, host, summary_format, output, debug_text):
         return
         
     click.echo(f"Generating summary using Ollama model '{model}'...")
-    summary = summarize_text(clean_text, host, model, summary_format)
+    summary, metrics = summarize_text(clean_text, host, model, summary_format)
     
     click.echo("\n--- Summary ---")
     click.echo(summary)
     click.echo("---------------\n")
+    click.echo(f"Metrics: Generated {metrics['eval_tokens']} tokens (Prompt: {metrics['prompt_tokens']} tokens)\n")
     
     if output:
         try:

@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const toast = document.getElementById('toast');
     const modelWarning = document.getElementById('model-warning');
     const historyList = document.getElementById('history-list');
+    const metricsFooter = document.getElementById('metrics-footer');
+    const evalTokensCount = document.getElementById('eval-tokens-count');
+    const promptTokensCount = document.getElementById('prompt-tokens-count');
 
     let currentLoadingInterval = null;
 
@@ -122,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         errorPanel.classList.add('hidden');
         resultsPanel.classList.add('hidden');
+        metricsFooter.classList.add('hidden');
         loaderPanel.classList.remove('hidden');
         submitBtn.classList.add('loading');
         submitBtn.disabled = true;
@@ -148,6 +152,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Display Results
             displaySummary(data.summary, format);
             extractedTextBody.textContent = data.raw_text;
+            
+            if (data.metrics) {
+                evalTokensCount.textContent = data.metrics.eval_tokens || 0;
+                promptTokensCount.textContent = data.metrics.prompt_tokens || 0;
+                metricsFooter.classList.remove('hidden');
+            } else {
+                metricsFooter.classList.add('hidden');
+            }
             
             resultsPanel.classList.remove('hidden');
             if (typeof loadHistory === 'function') {
@@ -483,6 +495,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Display results
         displaySummary(item.summary, item.format);
         extractedTextBody.textContent = item.raw_text;
+        
+        if (item.metrics) {
+            evalTokensCount.textContent = item.metrics.eval_tokens || 0;
+            promptTokensCount.textContent = item.metrics.prompt_tokens || 0;
+            metricsFooter.classList.remove('hidden');
+        } else {
+            metricsFooter.classList.add('hidden');
+        }
         
         resultsPanel.classList.remove('hidden');
         resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });

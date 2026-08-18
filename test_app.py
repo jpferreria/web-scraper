@@ -136,7 +136,9 @@ class TestLokalScraper(unittest.TestCase):
         mock_instance.chat.return_value = {
             "message": {
                 "content": "This is a mock summary of the scraped content."
-            }
+            },
+            "eval_count": 84,
+            "prompt_eval_count": 120
         }
         
         payload = {
@@ -154,6 +156,8 @@ class TestLokalScraper(unittest.TestCase):
         self.assertEqual(data["title"], "Documentation Page")
         self.assertEqual(data["summary"], "This is a mock summary of the scraped content.")
         self.assertEqual(data["raw_text"], "Scraped content from the website.")
+        self.assertEqual(data["metrics"]["eval_tokens"], 84)
+        self.assertEqual(data["metrics"]["prompt_tokens"], 120)
         
         # Verify history file is updated and entries are retrievable
         history_response = self.client.get("/api/history")

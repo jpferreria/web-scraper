@@ -66,7 +66,7 @@ def is_safe_url(url: str) -> bool:
 
 HISTORY_FILE = "history.json"
 
-def save_to_history(url: str, title: str, model: str, format: str, summary: str, raw_text: str):
+def save_to_history(url: str, title: str, model: str, format: str, summary: str, raw_text: str, metrics: dict = None):
     history = []
     if os.path.exists(HISTORY_FILE):
         try:
@@ -85,6 +85,8 @@ def save_to_history(url: str, title: str, model: str, format: str, summary: str,
         "summary": summary,
         "raw_text": raw_text
     }
+    if metrics:
+        item["metrics"] = metrics
     
     # Prepend to history
     history.insert(0, item)
@@ -225,6 +227,14 @@ async def summarize(payload: SummarizeRequest, x_ollama_host: str = Header(None)
         )
         summary = response['message']['content']
         
+        # Extract generation metrics
+        eval_tokens = response.get('eval_count', 0)
+        prompt_tokens = response.get('prompt_eval_count', 0)
+        metrics = {
+            "eval_tokens": eval_tokens,
+            "prompt_tokens": prompt_tokens
+        }
+        
         # Extract title from html_content
         from bs4 import BeautifulSoup
         try:
@@ -233,7 +243,7 @@ async def summarize(payload: SummarizeRequest, x_ollama_host: str = Header(None)
         except Exception:
             page_title = url.split("//")[-1].split("/")[0]
             
-        save_to_history(url, page_title, model, summary_format, summary, clean_text)
+        save_to_history(url, page_title, model, summary_format, summary, clean_text, metrics)
         
         return {
             "url": url,
@@ -241,7 +251,8 @@ async def summarize(payload: SummarizeRequest, x_ollama_host: str = Header(None)
             "model": model,
             "format": summary_format,
             "summary": summary,
-            "raw_text": clean_text
+            "raw_text": clean_text,
+            "metrics": metrics
         }
     except ollama.ResponseError as e:
         raise HTTPException(

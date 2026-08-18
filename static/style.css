@@ -1253,3 +1253,25 @@ details[open] .details-chevron {
 [data-theme="light"][data-style="flat"] .glass-card {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
 }
+
+/* Generation Metrics Footer */
+.metrics-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.metrics-footer i {
+    color: var(--accent-start);
+    font-size: 0.82rem;
+}
+
+[data-theme="light"] .metrics-footer {
+    border-top-color: rgba(0, 0, 0, 0.08);
+}
