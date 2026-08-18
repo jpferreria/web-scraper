@@ -2,6 +2,8 @@
 
 Lokal Web Scraper is a secure, local-first web scraping and summarization application. It features a modern, responsive web application and a command-line interface, utilizing **FastAPI**, **BeautifulSoup**, and **Ollama** (with Gemma models) to process and summarize web pages completely locally.
 
+![Lokal Web Scraper Interface](assets/screenshot.png)
+
 ## Features
 
 - **Double-Style Interface**: Choose between a modern **Glassmorphic** design (translucent panes, blurred glows) and a clean, high-performance **Flat Design**.
